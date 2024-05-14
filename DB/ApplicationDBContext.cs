@@ -8,6 +8,6 @@ namespace DatingAPI.DB
         {
         }
 
-        public DbSet<User> User { get; set; }
+        public DbSet<UserAccount> UserAccount { get; set; }
     }
 }

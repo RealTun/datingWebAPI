@@ -18,6 +18,29 @@ CREATE TABLE [user_account] (
 );
 
 
+-- insert fake data
+--DECLARE @i int = 0;
+
+--WHILE @i < 20
+--BEGIN
+--  INSERT INTO user_account (email, phone, password, name, bio, age, gender, looking_for, location, confirmation_code, confirmation_time)
+--  VALUES (
+--    'user' + CAST(@i AS nvarchar(3)) + '@example.com',  -- Generate email with user+id@example.com
+--    '0123' + CAST(@i * 1000 AS nvarchar(10)),  -- Generate phone with 0123+id*1000
+--    'password' + CAST(@i AS nvarchar(3)),  -- Sample password (replace with hashing logic)
+--    'Name' + CAST(@i AS nvarchar(3)),  -- Generate name with Name+id
+--    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', -- Sample bio
+--    FLOOR(RAND() * (45 - 18 + 1)) + 18,  -- Generate random age between 18 and 45
+--    CAST(FLOOR(RAND() * 2) AS tinyint), -- Generate random gender (0 or 1)
+--    CAST(FLOOR(RAND() * 2) AS tinyint), -- Generate random looking_for (0 or 1)
+--    'City' + CAST(@i AS nvarchar(2)),  -- Generate location with City+id
+--    CAST(FLOOR(RAND() * 9000 + 1000) AS char(4)), -- Generate random confirmation code
+--    NULL  -- confirmation_time initially null
+--  );
+
+--  SET @i = @i + 1;
+--END;
+
 CREATE TABLE [user_photo] (
 	[id] int IDENTITY(1,1) PRIMARY KEY, 
 	[user_account_id] int not null, 
