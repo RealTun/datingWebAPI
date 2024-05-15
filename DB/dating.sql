@@ -1,4 +1,4 @@
-create database Dating;
+﻿create database Dating;
 
 use Dating;
 
@@ -53,6 +53,10 @@ CREATE TABLE [relationship_type] (
 	[id] int IDENTITY(1,1) PRIMARY KEY, 
 	[name] nvarchar(100) UNIQUE
 );
+
+--insert into [relationship_type] ([name]) values 
+--(N'Người yêu'), (N'Những người bạn mới'),
+--(N'Bất kì điều gì có thể'), (N'Mình cũng chưa rõ lắm')
 
 
 CREATE TABLE [interested_in_relation] (

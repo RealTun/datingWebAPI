@@ -9,5 +9,7 @@ namespace DatingAPI.DB
         }
 
         public DbSet<UserAccount> UserAccount { get; set; }
+        public DbSet<InterestType> InterestType { get; set; }
+        public DbSet<RelationshipType> RelationshipType { get; set; }
     }
 }
