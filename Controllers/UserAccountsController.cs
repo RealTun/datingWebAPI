@@ -19,14 +19,13 @@ namespace DatingAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            //return View(await _context.UserAccount.ToListAsync());
             var users = await _context.UserAccount.ToListAsync();
             return Ok(users);
         }
 
         // GET: UserAccounts/Details/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> GetUserAccount(int? id)
         {
             if (id == null)
             {
@@ -41,117 +40,100 @@ namespace DatingAPI.Controllers
             }
             var response = new
             {
-                Name = userAccount.Name,
-                Email = userAccount.Email,
-                Phone = userAccount.Phone,
-                Bio = userAccount.Bio,
-                Age = userAccount.Age,
+                userAccount.Name,
+                userAccount.Email,
+                userAccount.Phone,
+                userAccount.Bio,
+                userAccount.Age,
                 Gender = userAccount.Gender == 0 ? "Nam" : "Nữ",
-                Location = userAccount.Location,
+                userAccount.Location,
             };
 
             return Ok(response);
         }
 
-        // POST: UserAccounts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Email,Phone,Password,Name,Bio,Age,Gender,Looking_For,Location,Confirmation_Code,Confirmation_Time")] UserAccount userAccount)
+        public async Task<IActionResult> CreateUserAccount([FromBody] UserAccount userAccount)
         {
             if (ModelState.IsValid)
             {
+                var isEmailDuplicate = _context.UserAccount.Any(u => u.Email == userAccount.Email);
+                if (isEmailDuplicate)
+                {
+                    return BadRequest("Email address already exists.");
+                }
+
+                // Check for duplicate phone number
+                var isPhoneDuplicate = _context.UserAccount.Any(u => u.Phone == userAccount.Phone);
+                if (isPhoneDuplicate)
+                {
+                    return BadRequest("Phone number already exists.");
+                }
+
+                userAccount.Password = HashPassword(userAccount.Password);
+
                 _context.Add(userAccount);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // Return a success response with relevant information (optional)
+                return CreatedAtAction("GetUserAccount", new { id = userAccount.Id }, userAccount);
             }
-            return BadRequest(ModelState);
+            return BadRequest(ModelState); // Return bad request with validation errors
         }
-
-        // GET: UserAccounts/Edit/5
-        //public async Task<IActionResult> Edit(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var userAccount = await _context.UserAccount.FindAsync(id);
-        //    if (userAccount == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return View(userAccount);
-        //}
 
         // POST: UserAccounts/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("Id,Email,Phone,Password,Name,Bio,Age,Gender,Looking_For,Location,Confirmation_Code,Confirmation_Time")] UserAccount userAccount)
-        //{
-        //    if (id != userAccount.Id)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            _context.Update(userAccount);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!UserAccountExists(userAccount.Id))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(userAccount);
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUserAccount(int id, [FromBody] UserAccount userAccount)
+        {
+            if (id != userAccount.Id)
+            {
+                return BadRequest("User ID in request body and path don't match.");
+            }
 
-        // GET: UserAccounts/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (ModelState.IsValid)
+            {
+                _context.Update(userAccount);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserAccountExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
 
-        //    var userAccount = await _context.UserAccount
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (userAccount == null)
-        //    {
-        //        return NotFound();
-        //    }
+                return Ok(new
+                {
+                    User = userAccount,
+                    Message = "Updated information user successfully."
+                });
+            }
 
-        //    return View(userAccount);
-        //}
+            return BadRequest(ModelState);
+        }
 
-        // POST: UserAccounts/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var userAccount = await _context.UserAccount.FindAsync(id);
-        //    if (userAccount != null)
-        //    {
-        //        _context.UserAccount.Remove(userAccount);
-        //    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var userAccount = await _context.UserAccount.FindAsync(id);
+            if (userAccount != null)
+            {
+                _context.UserAccount.Remove(userAccount);
+            }
 
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
+            await _context.SaveChangesAsync();
+            return Ok("Deleted user successfully.");
+        }
 
         private bool UserAccountExists(int id)
         {
@@ -168,6 +150,11 @@ namespace DatingAPI.Controllers
                 Message = isExisted ? "Phone number already exists." : "Phone number not found."
             };
             return Ok(response);
+        }
+
+        public static string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
     }
 }
