@@ -73,6 +73,12 @@ CREATE TABLE [interest_type] (
 	[name] nvarchar(100) UNIQUE
 );
 
+INSERT INTO interest_type ([name]) VALUES
+(N'Thể thao'),(N'Âm nhạc'),(N'Điện ảnh'),(N'Đọc sách'),(N'Chơi game'),(N'Du lịch'),(N'Ẩm thực'),(N'Vẽ tranh'),
+(N'Chụp ảnh'),(N'Làm vườn'),(N'Nuôi thú cưng'),(N'May vá'),(N'Đan móc'),('Origami'),(N'Thủ công'),
+(N'Bộ sưu tập'),(N'Cờ bạc'),(N'Khiêu vũ'),(N'Nghệ thuật'),(N'Lịch sử'),(N'Khoa học'),
+(N'Bóng đá'),(N'Bóng rổ'),(N'Bóng chuyền'),(N'Cầu lông'),('Tennis'),(N'Bơi lội'),(N'Chạy bộ'),('Gym'),('Yoga')
+
 
 CREATE TABLE [interest_user] (
   [id] int IDENTITY(1,1) PRIMARY KEY, 
@@ -81,6 +87,7 @@ CREATE TABLE [interest_user] (
   foreign key (user_account_id) references user_account(id),
   foreign key (interest_type_id) references interest_type(id)
 );
+
 
 
 CREATE TABLE [match] (
